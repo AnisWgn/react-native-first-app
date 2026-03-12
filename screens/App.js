@@ -4,29 +4,26 @@ import { useState } from 'react';
 import { auth } from '../fireBaseConfig.js';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
+// Écran de connexion : l'entrée VIP vers l'app (mot de passe oublié = skill issue)
 export default function Page1Screen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handlelogin = () => {
+  const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        navigation.navigate('page2', { email });
+        navigation.navigate('pageMenu');
       })
       .catch((error) => {
-        Alert.alert('Erreur', error.message);
+        Alert.alert('Erreur de connexion', error.message);
       });
-  }
-
-  const afficheMessage = () => {
-    alert(`Message envoyé \nEmail : ${email}`);
   };
 
   return (
     <View style={styles.container}>
       <Text>Connexion</Text>
       <TextInput
-        placeholder="Adresse email"
+        placeholder="Adresse e-mail"
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
@@ -42,7 +39,9 @@ export default function Page1Screen({ navigation }) {
         style={styles.input}
       />
 
-      <Pressable style={styles.button} title="Se connecter" onPress={handlelogin}></Pressable>
+      <Pressable style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Se connecter</Text>
+      </Pressable>
     </View>
   );
 }

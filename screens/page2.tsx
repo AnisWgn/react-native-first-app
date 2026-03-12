@@ -1,14 +1,23 @@
 import React, {useEffect, useState} from 'react';
-import { View, Text, StyleSheet, Pressable, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable, FlatList, ActivityIndicator, TouchableOpacity, Button } from 'react-native';
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../fireBaseConfig.js';
-import {onAuthStateChanged} from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 
+// Liste des desserts : quand Firestore et le sucre font bon ménage 🍰
 export default function Page2Screen({navigation, route}) {
     const [desserts, setDesserts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [email, setEmail] = useState(route?.params?.email ?? '');
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            navigation.replace('page1');
+        } catch (err) {
+            console.log('Erreur déconnexion :', err);
+        }
+    };
 
     useEffect(() => {
         const fetchDesserts = async () => {
@@ -32,9 +41,8 @@ export default function Page2Screen({navigation, route}) {
 
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (!user) {
-                navigation.navigate('page1');
+                navigation.replace('page1');
             } else {
-                setEmail((prev) => prev || (user?.email ?? ''));
                 fetchDesserts();
             }
         });
@@ -44,7 +52,7 @@ export default function Page2Screen({navigation, route}) {
 
     return (
         <View style={styles.viewStyle}>
-            <Text style={styles.textStyle}>Bienvenue {'\n'}{email}</Text>
+            <Text style={styles.textStyle}>Connecté : {auth.currentUser?.email}</Text>
             <Text style={styles.title}>Liste des desserts</Text>
             {loading ? (
                 <ActivityIndicator size="large" style={{ marginVertical: 20 }} />
@@ -67,10 +75,11 @@ export default function Page2Screen({navigation, route}) {
             )}
             <Pressable
                 style={styles.buttonStyle}
-                onPress={() => navigation.navigate('page1')}
+                onPress={() => navigation.navigate('pageMenu')}
             >
-                <Text style={styles.buttonText}>Retour vers page 1</Text>
+                <Text style={styles.buttonText}>Retour au menu</Text>
             </Pressable>
+            <Button color="#b00020" title="Quitter" onPress={handleLogout} />
         </View>
     );
 }
