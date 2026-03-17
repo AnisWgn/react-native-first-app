@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Button } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Pressable, Platform } from 'react-native';
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -15,7 +15,7 @@ export default function GererLesPegis({ navigation }) {
       await signOut(auth);
       navigation.replace('page1');
     } catch (err) {
-      console.log('Erreur déconnexion :', err);
+      console.log('Erreur deconnexion :', err);
     }
   };
 
@@ -45,44 +45,95 @@ export default function GererLesPegis({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Gérer les PEGI</Text>
-      <Text style={styles.subtitle}>Connecté : {auth.currentUser?.email}</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>PEGI</Text>
+        <View style={styles.badge}>
+          <View style={styles.badgeDot} />
+          <Text style={styles.badgeText}>{auth.currentUser?.email}</Text>
+        </View>
+      </View>
+
       {loading ? (
-        <ActivityIndicator size="large" style={{ marginVertical: 20 }} />
+        <View style={styles.centerBox}>
+          <ActivityIndicator size="large" color="#6366F1" />
+          <Text style={styles.loadingText}>Chargement...</Text>
+        </View>
       ) : error ? (
-        <Text style={styles.errorText}>{error}</Text>
+        <View style={styles.centerBox}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
       ) : pegis.length === 0 ? (
-        <Text style={styles.emptyText}>Aucun PEGI dans la collection</Text>
+        <View style={styles.centerBox}>
+          <Text style={styles.emptyText}>Aucun PEGI dans la collection</Text>
+        </View>
       ) : (
         <FlatList
           style={styles.list}
+          contentContainerStyle={styles.listContent}
           data={pegis}
+          showsVerticalScrollIndicator={false}
           keyExtractor={(item, index) => item.id ?? index.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity
-              style={styles.item}
+              style={styles.card}
+              activeOpacity={0.7}
               onPress={() => navigation.navigate('detailPegi', { pegi: item })}
             >
-              <Text style={styles.cardTitle}>{item.libelle ?? item.nom ?? item.id}</Text>
-              <Text style={styles.cardSubtitle}>ID : {item.id}</Text>
+              <View style={styles.cardAccent} />
+              <View style={styles.cardBody}>
+                <Text style={styles.cardTitle}>{item.libelle ?? item.nom ?? item.id}</Text>
+                <Text style={styles.cardId}>#{item.id}</Text>
+              </View>
+              <Text style={styles.cardArrow}>›</Text>
             </TouchableOpacity>
           )}
         />
       )}
-      <Button color="gray" title="Retour au menu" onPress={() => navigation.goBack()} />
-      <Button color="#b00020" title="Quitter" onPress={handleLogout} />
+
+      <View style={styles.footer}>
+        <Pressable
+          style={({ pressed }) => [styles.backBtn, pressed && styles.btnPressed]}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backBtnText}>Retour au menu</Text>
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.logoutBtn, pressed && styles.logoutBtnPressed]}
+          onPress={handleLogout}
+        >
+          <Text style={styles.logoutText}>Quitter</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
 
+const ACCENT = '#F97316';
+
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 50, paddingHorizontal: 12, backgroundColor: '#F2F6F4', alignItems: 'center' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
-  subtitle: { fontSize: 14, marginBottom: 20, color: '#666' },
-  list: { flex: 1, width: '100%' },
-  item: { width: '100%', padding: 12, marginBottom: 8, backgroundColor: '#fff', borderRadius: 8 },
-  cardTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-  cardSubtitle: { fontSize: 14, color: '#666' },
-  errorText: { color: 'red', padding: 20, textAlign: 'center' },
-  emptyText: { color: '#666', padding: 20, textAlign: 'center' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingTop: 60, paddingHorizontal: 20 },
+  header: { marginBottom: 20 },
+  title: { fontSize: 28, fontWeight: '800', color: '#1E293B', letterSpacing: 0.5 },
+  badge: { flexDirection: 'row', alignItems: 'center', marginTop: 8, backgroundColor: '#EEF2FF', alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
+  badgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#10B981', marginRight: 8 },
+  badgeText: { fontSize: 13, color: '#6366F1', fontWeight: '600' },
+  centerBox: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  loadingText: { marginTop: 12, fontSize: 14, color: '#64748B' },
+  list: { flex: 1 },
+  listContent: { paddingBottom: 8 },
+  card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, shadowColor: '#64748B', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
+  cardAccent: { width: 4, height: 32, borderRadius: 2, backgroundColor: ACCENT, marginRight: 14 },
+  cardBody: { flex: 1 },
+  cardTitle: { fontSize: 16, fontWeight: '700', color: '#1E293B', marginBottom: 2 },
+  cardId: { fontSize: 13, color: '#94A3B8', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
+  cardArrow: { fontSize: 24, color: '#94A3B8', fontWeight: '300' },
+  footer: { flexDirection: 'row', gap: 10, paddingVertical: 16, paddingBottom: 32 },
+  backBtn: { flex: 1, backgroundColor: '#6366F1', borderRadius: 14, paddingVertical: 14, alignItems: 'center', shadowColor: '#6366F1', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
+  btnPressed: { transform: [{ scale: 0.98 }], opacity: 0.9 },
+  backBtnText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  logoutBtn: { backgroundColor: '#FEE2E2', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 20, alignItems: 'center', borderWidth: 1, borderColor: '#FECACA' },
+  logoutBtnPressed: { backgroundColor: '#FECACA' },
+  logoutText: { fontSize: 15, fontWeight: '700', color: '#DC2626' },
+  errorText: { color: '#DC2626', fontSize: 15, textAlign: 'center', padding: 20 },
+  emptyText: { color: '#64748B', fontSize: 15, textAlign: 'center' },
 });

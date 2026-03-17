@@ -1,7 +1,15 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, Button } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { auth } from '../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+
+const menuItems = [
+  { label: 'Gerer les jeux', route: 'gererLesJeux', accent: '#10B981' },
+  { label: 'Gerer les genres', route: 'gererLesGenres', accent: '#3B82F6' },
+  { label: 'Gerer les PEGI', route: 'gererLesPegis', accent: '#F97316' },
+  { label: 'Gerer les marques', route: 'gererLesMarques', accent: '#EC4899' },
+  { label: 'Gerer les plateformes', route: 'gererLesPlateformes', accent: '#8B5CF6' },
+];
 
 // Le menu principal : le carrefour de toutes les routes (comme un hub mais en mieux)
 export default function Menu({ navigation }) {
@@ -10,7 +18,7 @@ export default function Menu({ navigation }) {
       await signOut(auth);
       navigation.replace('page1');
     } catch (err) {
-      console.log('Erreur déconnexion :', err);
+      console.log('Erreur deconnexion :', err);
     }
   };
 
@@ -25,29 +33,38 @@ export default function Menu({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Menu</Text>
-      <Text style={styles.textStyle}>Connecté : {auth.currentUser?.email}</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Dashboard</Text>
+        <View style={styles.badge}>
+          <View style={styles.badgeDot} />
+          <Text style={styles.badgeText}>{auth.currentUser?.email}</Text>
+        </View>
+      </View>
 
-      <Pressable style={styles.menuItem} onPress={() => navigation.navigate('page2')}>
-        <Text style={styles.menuText}>Liste des desserts</Text>
-      </Pressable>
-      <Pressable style={styles.menuItem} onPress={() => navigation.navigate('gererLesJeux')}>
-        <Text style={styles.menuText}>Gérer les jeux</Text>
-      </Pressable>
-      <Pressable style={styles.menuItem} onPress={() => navigation.navigate('gererLesGenres')}>
-        <Text style={styles.menuText}>Gérer les genres</Text>
-      </Pressable>
-      <Pressable style={styles.menuItem} onPress={() => navigation.navigate('gererLesPegis')}>
-        <Text style={styles.menuText}>Gérer les PEGI</Text>
-      </Pressable>
-      <Pressable style={styles.menuItem} onPress={() => navigation.navigate('gererLesMarques')}>
-        <Text style={styles.menuText}>Gérer les marques</Text>
-      </Pressable>
-      <Pressable style={styles.menuItem} onPress={() => navigation.navigate('gererLesPlateformes')}>
-        <Text style={styles.menuText}>Gérer les plateformes</Text>
-      </Pressable>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {menuItems.map((item, index) => (
+          <Pressable
+            key={index}
+            style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+            onPress={() => navigation.navigate(item.route)}
+          >
+            <View style={[styles.menuAccent, { backgroundColor: item.accent }]} />
+            <Text style={styles.menuText}>{item.label}</Text>
+            <Text style={styles.menuArrow}>›</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
 
-      <Button color="#b00020" title="Quitter" onPress={handleLogout} />
+      <Pressable
+        style={({ pressed }) => [styles.logoutBtn, pressed && styles.logoutBtnPressed]}
+        onPress={handleLogout}
+      >
+        <Text style={styles.logoutText}>Deconnexion</Text>
+      </Pressable>
     </View>
   );
 }
@@ -55,33 +72,96 @@ export default function Menu({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
-    paddingHorizontal: 12,
-    backgroundColor: '#F2F6F4',
-    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    paddingTop: 60,
+    paddingHorizontal: 20,
+  },
+  header: {
+    marginBottom: 24,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#1E293B',
+    letterSpacing: 0.5,
   },
-  textStyle: {
-    fontSize: 15,
-    textAlign: 'center',
-    color: 'black',
-    padding: 12,
-    marginBottom: 20,
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    backgroundColor: '#EEF2FF',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  badgeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+    marginRight: 8,
+  },
+  badgeText: {
+    fontSize: 13,
+    color: '#6366F1',
+    fontWeight: '600',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 16,
   },
   menuItem: {
-    width: '80%',
-    padding: 16,
-    marginVertical: 8,
-    backgroundColor: 'gray',
-    borderRadius: 12,
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 12,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  menuItemPressed: {
+    backgroundColor: '#F1F5F9',
+    transform: [{ scale: 0.98 }],
+  },
+  menuAccent: {
+    width: 4,
+    height: 28,
+    borderRadius: 2,
+    marginRight: 16,
   },
   menuText: {
-    color: 'white',
+    flex: 1,
     fontSize: 16,
+    fontWeight: '600',
+    color: '#1E293B',
+  },
+  menuArrow: {
+    fontSize: 24,
+    color: '#94A3B8',
+    fontWeight: '300',
+  },
+  logoutBtn: {
+    backgroundColor: '#FEE2E2',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  logoutBtnPressed: {
+    backgroundColor: '#FECACA',
+  },
+  logoutText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#DC2626',
   },
 });

@@ -1,0 +1,15 @@
+# Clé Firebase - NE JAMAIS commiter !
+serviceAccountKey.json
+
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Environment
+.env
+.env.local
+.env.*.local

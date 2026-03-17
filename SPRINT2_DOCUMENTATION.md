@@ -25,7 +25,13 @@ L’application mobile Agora doit évoluer d’une simple application de consult
 
 ---
 
-## 2. Outils et technologies utilisés
+## 2. Plan de travail
+
+### Equipe
+
+Anis Wagner : 
+
+## 3. Outils et technologies utilisés
 
 | Technologie | Rôle |
 |-------------|------|

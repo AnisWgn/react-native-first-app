@@ -1,19 +1,16 @@
 import React, { useCallback } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
-import Page1Screen from './screens/App';
+import ConnexionScreen from './screens/connexion';
 import MenuScreen from './screens/menu';
-import Page3Screen from './screens/page3';
-
 
 SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator();
 
 // Chargement différé des écrans grâce à React.lazy le GOAT 🐐 (no cap, best perf ever)
-const Page2Screen = React.lazy(() => import('./screens/page2'));
 const GererLesJeuxScreen = React.lazy(() => import('./screens/gererLesJeux'));
 const DetailJeuScreen = React.lazy(() => import('./screens/detailJeu'));
 const GererLesGenresScreen = React.lazy(() => import('./screens/gererLesGenres'));
@@ -28,10 +25,8 @@ const DetailPlateformeScreen = React.lazy(() => import('./screens/detailPlatefor
 function MainStack() {
   return (
     <Stack.Navigator id="main-stack" screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="page1" component={Page1Screen} />
+      <Stack.Screen name="page1" component={ConnexionScreen} />
       <Stack.Screen name="pageMenu" component={MenuScreen} />
-      <Stack.Screen name="page2" component={Page2Screen} />
-      <Stack.Screen name="page3" component={Page3Screen} />
       <Stack.Screen name="gererLesJeux" component={GererLesJeuxScreen} />
       <Stack.Screen name="detailJeu" component={DetailJeuScreen} />
       <Stack.Screen name="gererLesGenres" component={GererLesGenresScreen} />
@@ -53,9 +48,29 @@ export default function App() {
 
   return (
     <NavigationContainer onReady={onReady}>
-      <React.Suspense fallback={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size="large" /></View>}>
+      <React.Suspense fallback={
+        <View style={loadingStyles.container}>
+          <ActivityIndicator size="large" color="#6366F1" />
+          <Text style={loadingStyles.text}>Chargement...</Text>
+        </View>
+      }>
         <MainStack />
       </React.Suspense>
     </NavigationContainer>
   );
 }
+
+const loadingStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+  },
+  text: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+});
