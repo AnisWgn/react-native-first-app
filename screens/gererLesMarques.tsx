@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Pressable, Platform } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -19,34 +20,43 @@ export default function GererLesMarques({ navigation }) {
     }
   };
 
-  useEffect(() => {
-    const fetchMarques = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const ref = collection(db, 'marques');
-        const snapshot = await getDocs(ref);
-        const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        setMarques(list);
-      } catch (err) {
-        console.error('Erreur Firestore:', err);
-        setError(err instanceof Error ? err.message : 'Impossible de charger les marques');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadMarques = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const ref = collection(db, 'marques');
+      const snapshot = await getDocs(ref);
+      const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setMarques(list);
+    } catch (err) {
+      console.error('Erreur Firestore:', err);
+      setError(err instanceof Error ? err.message : 'Impossible de charger les marques');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) navigation.replace('page1');
-      else fetchMarques();
+      else loadMarques();
     });
     return () => unsubscribe();
-  }, [navigation]);
+  }, [navigation, loadMarques]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (auth.currentUser) loadMarques();
+    }, [loadMarques])
+  );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Marques</Text>
+        <Pressable style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editMarque')}>
+          <Text style={styles.btnCreerText}>Créer une marque</Text>
+        </Pressable>
         <View style={styles.badge}>
           <View style={styles.badgeDot} />
           <Text style={styles.badgeText}>{auth.currentUser?.email}</Text>
@@ -74,18 +84,19 @@ export default function GererLesMarques({ navigation }) {
           showsVerticalScrollIndicator={false}
           keyExtractor={(item, index) => item.id ?? index.toString()}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.card}
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate('detailMarque', { marque: item })}
-            >
-              <View style={styles.cardAccent} />
-              <View style={styles.cardBody}>
-                <Text style={styles.cardTitle}>{item.libelle ?? item.nom ?? item.id}</Text>
-                <Text style={styles.cardId}>#{item.id}</Text>
-              </View>
-              <Text style={styles.cardArrow}>›</Text>
-            </TouchableOpacity>
+            <View style={styles.card}>
+              <TouchableOpacity style={styles.cardTouchable} activeOpacity={0.7} onPress={() => navigation.navigate('detailMarque', { marque: item })}>
+                <View style={styles.cardAccent} />
+                <View style={styles.cardBody}>
+                  <Text style={styles.cardTitle}>{item.libelle ?? item.nom ?? item.id}</Text>
+                  <Text style={styles.cardId}>#{item.id}</Text>
+                </View>
+                <Text style={styles.cardArrow}>›</Text>
+              </TouchableOpacity>
+              <Pressable style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editMarque', { marque: item })}>
+                <Text style={styles.btnModifierText}>Modifier</Text>
+              </Pressable>
+            </View>
           )}
         />
       )}
@@ -121,12 +132,17 @@ const styles = StyleSheet.create({
   loadingText: { marginTop: 12, fontSize: 14, color: '#64748B' },
   list: { flex: 1 },
   listContent: { paddingBottom: 8 },
-  card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, shadowColor: '#64748B', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
+  btnCreer: { backgroundColor: '#94A3B8', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, alignSelf: 'flex-start', marginTop: 8 },
+  btnCreerText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 10, shadowColor: '#64748B', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
+  cardTouchable: { flexDirection: 'row', alignItems: 'center' },
   cardAccent: { width: 4, height: 32, borderRadius: 2, backgroundColor: ACCENT, marginRight: 14 },
   cardBody: { flex: 1 },
   cardTitle: { fontSize: 16, fontWeight: '700', color: '#1E293B', marginBottom: 2 },
   cardId: { fontSize: 13, color: '#94A3B8', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   cardArrow: { fontSize: 24, color: '#94A3B8', fontWeight: '300' },
+  btnModifier: { marginTop: 10, backgroundColor: '#6366F1', paddingVertical: 8, borderRadius: 10, alignItems: 'center' },
+  btnModifierText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
   footer: { flexDirection: 'row', gap: 10, paddingVertical: 16, paddingBottom: 32 },
   backBtn: { flex: 1, backgroundColor: '#6366F1', borderRadius: 14, paddingVertical: 14, alignItems: 'center', shadowColor: '#6366F1', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
   btnPressed: { transform: [{ scale: 0.98 }], opacity: 0.9 },

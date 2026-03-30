@@ -5,7 +5,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 // Detail d'un genre : RPG, FPS, etc. (spoiler : c'est surtout du texte)
 export default function DetailGenre({ route, navigation }) {
-  const { genre } = route.params;
+  const genre = route?.params?.genre ?? null;
 
   const handleLogout = async () => {
     try {
@@ -23,15 +23,21 @@ export default function DetailGenre({ route, navigation }) {
     return () => unsubscribe();
   }, [navigation]);
 
+  if (!genre) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.card}>
         <View style={[styles.accentBar, { backgroundColor: '#3B82F6' }]} />
         <Text style={styles.label}>Genre</Text>
-        <Text style={styles.title}>{genre.libelle}</Text>
-        <Text style={styles.text}>{genre.description}</Text>
+        <Text style={styles.title}>{genre.libelle ?? genre.libGenre}</Text>
+        {genre.description ? (
+          <Text style={styles.text}>{genre.description}</Text>
+        ) : null}
         <View style={styles.idBadge}>
-          <Text style={styles.idText}>#{genre.id}</Text>
+          <Text style={styles.idText}>#{genre.id ?? genre.idGenre}</Text>
         </View>
       </View>
 
@@ -68,5 +74,5 @@ const styles = StyleSheet.create({
   logoutBtn: { backgroundColor: '#FEE2E2', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 20, alignItems: 'center', borderWidth: 1, borderColor: '#FECACA' },
   logoutBtnPressed: { backgroundColor: '#FECACA' },
   logoutText: { fontSize: 15, fontWeight: '700', color: '#DC2626' },
-    text: { fontSize: 18, color: '#black', textAlign: 'center', lineHeight: 22, paddingBottom: 10 },
+  text: { fontSize: 18, color: '#1E293B', textAlign: 'center', lineHeight: 22, paddingBottom: 10 },
 });
