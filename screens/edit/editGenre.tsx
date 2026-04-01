@@ -21,7 +21,7 @@ import {
   orderBy,
   limit,
 } from 'firebase/firestore';
-import { db, auth } from '../fireBaseConfig.js';
+import { db, auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 // Édition CRUD d'un genre : création, modification, suppression
@@ -32,7 +32,7 @@ export default function EditGenre({ route, navigation }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigation.replace('page1');
+      navigation.replace('pageConnexion');
     } catch (err) {
       console.log('Erreur deconnexion :', err);
     }
@@ -40,7 +40,7 @@ export default function EditGenre({ route, navigation }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('page1');
+      if (!user) navigation.replace('pageConnexion');
     });
     return () => unsubscribe();
   }, [navigation]);

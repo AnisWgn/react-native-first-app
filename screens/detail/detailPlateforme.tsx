@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
-import { auth } from '../fireBaseConfig.js';
+import { auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
-// Detail d'une marque : Nintendo, Sony... on affiche le nom, le reste c'est du marketing
-export default function DetailMarque({ route, navigation }) {
-  const { marque } = route.params;
+// Detail d'une plateforme : PC master race, Switch, PS5... toutes egales ici (enfin presque)
+export default function DetailPlateforme({ route, navigation }) {
+  const { plateforme } = route.params;
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigation.replace('page1');
+      navigation.replace('pageConnexion');
     } catch (err) {
       console.log('Erreur deconnexion :', err);
     }
@@ -18,7 +18,7 @@ export default function DetailMarque({ route, navigation }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('page1');
+      if (!user) navigation.replace('pageConnexion');
     });
     return () => unsubscribe();
   }, [navigation]);
@@ -26,12 +26,12 @@ export default function DetailMarque({ route, navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <View style={[styles.accentBar, { backgroundColor: '#EC4899' }]} />
-        <Text style={styles.label}>Marque</Text>
-        <Text style={styles.title}>{marque.libelle}</Text>
-        <Text style={styles.text}>{marque.description}</Text>
+        <View style={[styles.accentBar, { backgroundColor: '#8B5CF6' }]} />
+        <Text style={styles.label}>Plateforme</Text>
+        <Text style={styles.title}>{plateforme.libelle}</Text>
+        <Text style={styles.text}>{plateforme.description}</Text>
         <View style={styles.idBadge}>
-          <Text style={styles.idText}>#{marque.id}</Text>
+          <Text style={styles.idText}>#{plateforme.id}</Text>
         </View>
       </View>
 
@@ -68,5 +68,5 @@ const styles = StyleSheet.create({
   logoutBtn: { backgroundColor: '#FEE2E2', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 20, alignItems: 'center', borderWidth: 1, borderColor: '#FECACA' },
   logoutBtnPressed: { backgroundColor: '#FECACA' },
   logoutText: { fontSize: 15, fontWeight: '700', color: '#DC2626' },
-  text: { fontSize: 18, color: '#black', textAlign: 'center', lineHeight: 22, paddingBottom: 10 },
+    text: { fontSize: 18, color: '#black', textAlign: 'center', lineHeight: 22, paddingBottom: 10 },
 });

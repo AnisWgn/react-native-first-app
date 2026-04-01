@@ -2,35 +2,35 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Pressable, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { collection, getDocs } from 'firebase/firestore';
-import { db, auth } from '../fireBaseConfig.js';
+import { db, auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
-// Gestion des jeux : la collection des GOATs videoludiques (ou pas, on juge pas sauf si c'est FIFA)
-export default function GererLesJeux({ navigation }) {
-  const [jeux, setJeux] = useState([]);
+// Gestion des PEGI : 3, 7, 12, 16, 18
+export default function GererLesPegis({ navigation }) {
+  const [pegis, setPegis] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigation.replace('page1');
+      navigation.replace('pageConnexion');
     } catch (err) {
       console.log('Erreur deconnexion :', err);
     }
   };
 
-  const loadJeux = useCallback(async () => {
+  const loadPegis = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const jeuxRef = collection(db, 'jeux');
-      const snapshot = await getDocs(jeuxRef);
+      const ref = collection(db, 'pegis');
+      const snapshot = await getDocs(ref);
       const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setJeux(list);
+      setPegis(list);
     } catch (err) {
       console.error('Erreur Firestore:', err);
-      setError(err instanceof Error ? err.message : 'Impossible de charger les jeux');
+      setError(err instanceof Error ? err.message : 'Impossible de charger les PEGI');
     } finally {
       setLoading(false);
     }
@@ -38,24 +38,24 @@ export default function GererLesJeux({ navigation }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('page1');
-      else loadJeux();
+      if (!user) navigation.replace('pageConnexion');
+      else loadPegis();
     });
     return () => unsubscribe();
-  }, [navigation, loadJeux]);
+  }, [navigation, loadPegis]);
 
   useFocusEffect(
     useCallback(() => {
-      if (auth.currentUser) loadJeux();
-    }, [loadJeux])
+      if (auth.currentUser) loadPegis();
+    }, [loadPegis])
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Jeux</Text>
-        <Pressable style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editJeu')}>
-          <Text style={styles.btnCreerText}>Créer un jeu</Text>
+        <Text style={styles.title}>PEGI</Text>
+        <Pressable style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editPegi')}>
+          <Text style={styles.btnCreerText}>Créer un PEGI</Text>
         </Pressable>
         <View style={styles.badge}>
           <View style={styles.badgeDot} />
@@ -72,28 +72,28 @@ export default function GererLesJeux({ navigation }) {
         <View style={styles.centerBox}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
-      ) : jeux.length === 0 ? (
+      ) : pegis.length === 0 ? (
         <View style={styles.centerBox}>
-          <Text style={styles.emptyText}>Aucun jeu dans la collection</Text>
+          <Text style={styles.emptyText}>Aucun PEGI dans la collection</Text>
         </View>
       ) : (
         <FlatList
           style={styles.list}
           contentContainerStyle={styles.listContent}
-          data={jeux}
+          data={pegis}
           showsVerticalScrollIndicator={false}
           keyExtractor={(item, index) => item.id ?? index.toString()}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <TouchableOpacity style={styles.cardTouchable} activeOpacity={0.7} onPress={() => navigation.navigate('detailJeu', { jeu: item })}>
+              <TouchableOpacity style={styles.cardTouchable} activeOpacity={0.7} onPress={() => navigation.navigate('detailPegi', { pegi: item })}>
                 <View style={styles.cardAccent} />
                 <View style={styles.cardBody}>
-                  <Text style={styles.cardTitle}>{item.nom}</Text>
+                  <Text style={styles.cardTitle}>{item.libelle ?? item.nom ?? item.id}</Text>
                   <Text style={styles.cardId}>#{item.id}</Text>
                 </View>
                 <Text style={styles.cardArrow}>›</Text>
               </TouchableOpacity>
-              <Pressable style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editJeu', { jeu: item })}>
+              <Pressable style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editPegi', { pegi: item })}>
                 <Text style={styles.btnModifierText}>Modifier</Text>
               </Pressable>
             </View>
@@ -119,7 +119,7 @@ export default function GererLesJeux({ navigation }) {
   );
 }
 
-const ACCENT = '#10B981';
+const ACCENT = '#F97316';
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC', paddingTop: 60, paddingHorizontal: 20 },

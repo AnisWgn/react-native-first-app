@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
-import { auth } from '../fireBaseConfig.js';
+import { auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 // Detail d'un genre : RPG, FPS, etc. (spoiler : c'est surtout du texte)
@@ -10,7 +10,7 @@ export default function DetailGenre({ route, navigation }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigation.replace('page1');
+      navigation.replace('pageConnexion');
     } catch (err) {
       console.log('Erreur deconnexion :', err);
     }
@@ -18,7 +18,7 @@ export default function DetailGenre({ route, navigation }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('page1');
+      if (!user) navigation.replace('pageConnexion');
     });
     return () => unsubscribe();
   }, [navigation]);

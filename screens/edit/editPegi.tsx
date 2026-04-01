@@ -19,7 +19,7 @@ import {
   orderBy,
   limit,
 } from 'firebase/firestore';
-import { db, auth } from '../fireBaseConfig.js';
+import { db, auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 export default function EditPegi({ route, navigation }) {
@@ -29,7 +29,7 @@ export default function EditPegi({ route, navigation }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('page1');
+      if (!user) navigation.replace('pageConnexion');
     });
     return () => unsubscribe();
   }, [navigation]);
@@ -138,7 +138,7 @@ export default function EditPegi({ route, navigation }) {
         <Pressable style={({ pressed }) => [styles.backBtn, pressed && styles.btnPressed]} onPress={() => navigation.goBack()}>
           <Text style={styles.backBtnText}>Retour à la liste des PEGI</Text>
         </Pressable>
-        <Pressable style={({ pressed }) => [styles.logoutBtn, pressed && styles.logoutBtnPressed]} onPress={async () => { await signOut(auth); navigation.replace('page1'); }}>
+        <Pressable style={({ pressed }) => [styles.logoutBtn, pressed && styles.logoutBtnPressed]} onPress={async () => { await signOut(auth); navigation.replace('pageConnexion'); }}>
           <Text style={styles.logoutText}>Quitter</Text>
         </Pressable>
       </View>

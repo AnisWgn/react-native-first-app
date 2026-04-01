@@ -3,34 +3,38 @@ import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
-import ConnexionScreen from './screens/connexion';
-import MenuScreen from './screens/menu';
+
+//Import remplacer par lazy
+//import { ConnexionScreen } from './screens/connexion';
+//import { MenuScreen } from './screens/menu';
 
 SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator();
 
-// Chargement différé des écrans grâce à React.lazy le GOAT 🐐 (no cap, best perf ever)
-const GererLesJeuxScreen = React.lazy(() => import('./screens/gererLesJeux'));
-const DetailJeuScreen = React.lazy(() => import('./screens/detailJeu'));
-const EditJeuScreen = React.lazy(() => import('./screens/editJeu'));
-const GererLesGenresScreen = React.lazy(() => import('./screens/gererLesGenres'));
-const DetailGenreScreen = React.lazy(() => import('./screens/detailGenre'));
-const EditGenreScreen = React.lazy(() => import('./screens/editGenre'));
-const GererLesPegisScreen = React.lazy(() => import('./screens/gererLesPegis'));
-const DetailPegiScreen = React.lazy(() => import('./screens/detailPegi'));
-const EditPegiScreen = React.lazy(() => import('./screens/editPegi'));
-const GererLesMarquesScreen = React.lazy(() => import('./screens/gererLesMarques'));
-const DetailMarqueScreen = React.lazy(() => import('./screens/detailMarque'));
-const EditMarqueScreen = React.lazy(() => import('./screens/editMarque'));
-const GererLesPlateformesScreen = React.lazy(() => import('./screens/gererLesPlateformes'));
-const DetailPlateformeScreen = React.lazy(() => import('./screens/detailPlateforme'));
-const EditPlateformeScreen = React.lazy(() => import('./screens/editPlateforme'));
+// Chargement différé des écrans grâce à React.lazy le GOAT (no cap, best perf ever)
+const ConnexionScreen = React.lazy(() => import('./screens/connexion'));
+const MenuScreen = React.lazy(() => import('./screens/menu'));
+const GererLesJeuxScreen = React.lazy(() => import('./screens/gerer/gererLesJeux'));
+const DetailJeuScreen = React.lazy(() => import('./screens/detail/detailJeu'));
+const EditJeuScreen = React.lazy(() => import('./screens/edit/editJeu'));
+const GererLesGenresScreen = React.lazy(() => import('./screens/gerer/gererLesGenres'));
+const DetailGenreScreen = React.lazy(() => import('./screens/detail/detailGenre'));
+const EditGenreScreen = React.lazy(() => import('./screens/edit/editGenre'));
+const GererLesPegisScreen = React.lazy(() => import('./screens/gerer/gererLesPegis'));
+const DetailPegiScreen = React.lazy(() => import('./screens/detail/detailPegi'));
+const EditPegiScreen = React.lazy(() => import('./screens/edit/editPegi'));
+const GererLesMarquesScreen = React.lazy(() => import('./screens/gerer/gererLesMarques'));
+const DetailMarqueScreen = React.lazy(() => import('./screens/detail/detailMarque'));
+const EditMarqueScreen = React.lazy(() => import('./screens/edit/editMarque'));
+const GererLesPlateformesScreen = React.lazy(() => import('./screens/gerer/gererLesPlateformes'));
+const DetailPlateformeScreen = React.lazy(() => import('./screens/detail/detailPlateforme'));
+const EditPlateformeScreen = React.lazy(() => import('./screens/edit/editPlateforme'));
 
 function MainStack() {
   return (
     <Stack.Navigator id="main-stack" screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="page1" component={ConnexionScreen} />
+      <Stack.Screen name="pageConnexion" component={ConnexionScreen} />
       <Stack.Screen name="pageMenu" component={MenuScreen} />
       <Stack.Screen name="gererLesJeux" component={GererLesJeuxScreen} />
       <Stack.Screen name="detailJeu" component={DetailJeuScreen} />

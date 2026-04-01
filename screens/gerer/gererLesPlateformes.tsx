@@ -2,35 +2,35 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Pressable, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { collection, getDocs } from 'firebase/firestore';
-import { db, auth } from '../fireBaseConfig.js';
+import { db, auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
-// Gestion des genres : RPG, FPS, indie... Firestore les stocke tous sans discrimination
-export default function GererLesGenres({ navigation }) {
-  const [genres, setGenres] = useState([]);
+// Gestion des plateformes : PC, Switch, PS5... toutes reunies sans guerre de fanboys
+export default function GererLesPlateformes({ navigation }) {
+  const [plateformes, setPlateformes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigation.replace('page1');
+      navigation.replace('pageConnexion');
     } catch (err) {
       console.log('Erreur deconnexion :', err);
     }
   };
 
-  const loadGenres = useCallback(async () => {
+  const loadPlateformes = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const ref = collection(db, 'genres');
+      const ref = collection(db, 'plateformes');
       const snapshot = await getDocs(ref);
       const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setGenres(list);
+      setPlateformes(list);
     } catch (err) {
       console.error('Erreur Firestore:', err);
-      setError(err instanceof Error ? err.message : 'Impossible de charger les genres');
+      setError(err instanceof Error ? err.message : 'Impossible de charger les plateformes');
     } finally {
       setLoading(false);
     }
@@ -38,27 +38,24 @@ export default function GererLesGenres({ navigation }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('page1');
-      else loadGenres();
+      if (!user) navigation.replace('pageConnexion');
+      else loadPlateformes();
     });
     return () => unsubscribe();
-  }, [navigation, loadGenres]);
+  }, [navigation, loadPlateformes]);
 
   useFocusEffect(
     useCallback(() => {
-      if (auth.currentUser) loadGenres();
-    }, [loadGenres])
+      if (auth.currentUser) loadPlateformes();
+    }, [loadPlateformes])
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Genres</Text>
-        <Pressable
-          style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]}
-          onPress={() => navigation.navigate('editGenre')}
-        >
-          <Text style={styles.btnCreerText}>Créer un genre</Text>
+        <Text style={styles.title}>Plateformes</Text>
+        <Pressable style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editPlateforme')}>
+          <Text style={styles.btnCreerText}>Créer une plateforme</Text>
         </Pressable>
         <View style={styles.badge}>
           <View style={styles.badgeDot} />
@@ -75,35 +72,28 @@ export default function GererLesGenres({ navigation }) {
         <View style={styles.centerBox}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
-      ) : genres.length === 0 ? (
+      ) : plateformes.length === 0 ? (
         <View style={styles.centerBox}>
-          <Text style={styles.emptyText}>Aucun genre dans la collection</Text>
+          <Text style={styles.emptyText}>Aucune plateforme dans la collection</Text>
         </View>
       ) : (
         <FlatList
           style={styles.list}
           contentContainerStyle={styles.listContent}
-          data={genres}
+          data={plateformes}
           showsVerticalScrollIndicator={false}
           keyExtractor={(item, index) => item.id ?? index.toString()}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <TouchableOpacity
-                style={styles.cardTouchable}
-                activeOpacity={0.7}
-                onPress={() => navigation.navigate('detailGenre', { genre: item })}
-              >
+              <TouchableOpacity style={styles.cardTouchable} activeOpacity={0.7} onPress={() => navigation.navigate('detailPlateforme', { plateforme: item })}>
                 <View style={styles.cardAccent} />
                 <View style={styles.cardBody}>
-                  <Text style={styles.cardTitle}>{item.libelle ?? item.libGenre ?? item.nom ?? item.id}</Text>
-                  <Text style={styles.cardId}>#{item.id ?? item.idGenre}</Text>
+                  <Text style={styles.cardTitle}>{item.libelle ?? item.nom ?? item.id}</Text>
+                  <Text style={styles.cardId}>#{item.id}</Text>
                 </View>
                 <Text style={styles.cardArrow}>›</Text>
               </TouchableOpacity>
-              <Pressable
-                style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]}
-                onPress={() => navigation.navigate('editGenre', { genre: item })}
-              >
+              <Pressable style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editPlateforme', { plateforme: item })}>
                 <Text style={styles.btnModifierText}>Modifier</Text>
               </Pressable>
             </View>
@@ -129,7 +119,7 @@ export default function GererLesGenres({ navigation }) {
   );
 }
 
-const ACCENT = '#3B82F6';
+const ACCENT = '#8B5CF6';
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC', paddingTop: 60, paddingHorizontal: 20 },

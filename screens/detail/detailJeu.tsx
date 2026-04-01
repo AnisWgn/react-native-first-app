@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
-import { auth } from '../fireBaseConfig.js';
+import { auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
-// Detail d'un jeu : la fiche du GOAT (ou du flop, on affiche quand meme)
+// Detail d'un jeu :
 export default function DetailJeu({ route, navigation }) {
   const { jeu } = route.params;
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigation.replace('page1');
+      navigation.replace('pageConnexion');
     } catch (err) {
       console.log('Erreur deconnexion :', err);
     }
@@ -18,7 +18,7 @@ export default function DetailJeu({ route, navigation }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('page1');
+      if (!user) navigation.replace('pageConnexion');
     });
     return () => unsubscribe();
   }, [navigation]);

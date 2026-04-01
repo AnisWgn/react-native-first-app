@@ -11,12 +11,12 @@ const menuItems = [
   { label: 'Gerer les plateformes', route: 'gererLesPlateformes', accent: '#8B5CF6' },
 ];
 
-// Le menu principal : le carrefour de toutes les routes (comme un hub mais en mieux)
+// Le menu principal : le carrefour de toutes les routes 
 export default function Menu({ navigation }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigation.replace('page1');
+      navigation.replace('pageConnexion');
     } catch (err) {
       console.log('Erreur deconnexion :', err);
     }
@@ -25,7 +25,7 @@ export default function Menu({ navigation }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        navigation.replace('page1');
+        navigation.replace('pageConnexion');
       }
     });
     return () => unsubscribe();
@@ -36,7 +36,6 @@ export default function Menu({ navigation }) {
       <View style={styles.header}>
         <Text style={styles.title}>Dashboard</Text>
         <View style={styles.badge}>
-          <View style={styles.badgeDot} />
           <Text style={styles.badgeText}>{auth.currentUser?.email}</Text>
         </View>
       </View>
@@ -94,13 +93,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-  },
-  badgeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#10B981',
-    marginRight: 8,
   },
   badgeText: {
     fontSize: 13,

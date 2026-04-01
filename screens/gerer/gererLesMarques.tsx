@@ -2,35 +2,35 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Pressable, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { collection, getDocs } from 'firebase/firestore';
-import { db, auth } from '../fireBaseConfig.js';
+import { db, auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
-// Gestion des PEGI : 3, 7, 12, 16, 18... pour savoir si maman va gueuler ou pas
-export default function GererLesPegis({ navigation }) {
-  const [pegis, setPegis] = useState([]);
+// Gestion des marques : Nintendo, Sony, Xbox... la guerre des consoles, version Firestore
+export default function GererLesMarques({ navigation }) {
+  const [marques, setMarques] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigation.replace('page1');
+      navigation.replace('pageConnexion');
     } catch (err) {
       console.log('Erreur deconnexion :', err);
     }
   };
 
-  const loadPegis = useCallback(async () => {
+  const loadMarques = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const ref = collection(db, 'pegis');
+      const ref = collection(db, 'marques');
       const snapshot = await getDocs(ref);
       const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setPegis(list);
+      setMarques(list);
     } catch (err) {
       console.error('Erreur Firestore:', err);
-      setError(err instanceof Error ? err.message : 'Impossible de charger les PEGI');
+      setError(err instanceof Error ? err.message : 'Impossible de charger les marques');
     } finally {
       setLoading(false);
     }
@@ -38,24 +38,24 @@ export default function GererLesPegis({ navigation }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('page1');
-      else loadPegis();
+      if (!user) navigation.replace('pageConnexion');
+      else loadMarques();
     });
     return () => unsubscribe();
-  }, [navigation, loadPegis]);
+  }, [navigation, loadMarques]);
 
   useFocusEffect(
     useCallback(() => {
-      if (auth.currentUser) loadPegis();
-    }, [loadPegis])
+      if (auth.currentUser) loadMarques();
+    }, [loadMarques])
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>PEGI</Text>
-        <Pressable style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editPegi')}>
-          <Text style={styles.btnCreerText}>Créer un PEGI</Text>
+        <Text style={styles.title}>Marques</Text>
+        <Pressable style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editMarque')}>
+          <Text style={styles.btnCreerText}>Créer une marque</Text>
         </Pressable>
         <View style={styles.badge}>
           <View style={styles.badgeDot} />
@@ -72,20 +72,20 @@ export default function GererLesPegis({ navigation }) {
         <View style={styles.centerBox}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
-      ) : pegis.length === 0 ? (
+      ) : marques.length === 0 ? (
         <View style={styles.centerBox}>
-          <Text style={styles.emptyText}>Aucun PEGI dans la collection</Text>
+          <Text style={styles.emptyText}>Aucune marque dans la collection</Text>
         </View>
       ) : (
         <FlatList
           style={styles.list}
           contentContainerStyle={styles.listContent}
-          data={pegis}
+          data={marques}
           showsVerticalScrollIndicator={false}
           keyExtractor={(item, index) => item.id ?? index.toString()}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <TouchableOpacity style={styles.cardTouchable} activeOpacity={0.7} onPress={() => navigation.navigate('detailPegi', { pegi: item })}>
+              <TouchableOpacity style={styles.cardTouchable} activeOpacity={0.7} onPress={() => navigation.navigate('detailMarque', { marque: item })}>
                 <View style={styles.cardAccent} />
                 <View style={styles.cardBody}>
                   <Text style={styles.cardTitle}>{item.libelle ?? item.nom ?? item.id}</Text>
@@ -93,7 +93,7 @@ export default function GererLesPegis({ navigation }) {
                 </View>
                 <Text style={styles.cardArrow}>›</Text>
               </TouchableOpacity>
-              <Pressable style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editPegi', { pegi: item })}>
+              <Pressable style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editMarque', { marque: item })}>
                 <Text style={styles.btnModifierText}>Modifier</Text>
               </Pressable>
             </View>
@@ -119,7 +119,7 @@ export default function GererLesPegis({ navigation }) {
   );
 }
 
-const ACCENT = '#F97316';
+const ACCENT = '#EC4899';
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC', paddingTop: 60, paddingHorizontal: 20 },

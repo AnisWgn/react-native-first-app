@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
-import { auth } from '../fireBaseConfig.js';
+import { auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
-// Detail d'une plateforme : PC master race, Switch, PS5... toutes egales ici (enfin presque)
-export default function DetailPlateforme({ route, navigation }) {
-  const { plateforme } = route.params;
+// Detail d'un PEGI : 18+ = contenu adulte (ou juste GTA, same thing)
+export default function DetailPegi({ route, navigation }) {
+  const { pegi } = route.params;
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigation.replace('page1');
+      navigation.replace('pageConnexion');
     } catch (err) {
       console.log('Erreur deconnexion :', err);
     }
@@ -18,7 +18,7 @@ export default function DetailPlateforme({ route, navigation }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('page1');
+      if (!user) navigation.replace('pageConnexion');
     });
     return () => unsubscribe();
   }, [navigation]);
@@ -26,12 +26,12 @@ export default function DetailPlateforme({ route, navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <View style={[styles.accentBar, { backgroundColor: '#8B5CF6' }]} />
-        <Text style={styles.label}>Plateforme</Text>
-        <Text style={styles.title}>{plateforme.libelle}</Text>
-        <Text style={styles.text}>{plateforme.description}</Text>
+        <View style={[styles.accentBar, { backgroundColor: '#F97316' }]} />
+        <Text style={styles.label}>PEGI</Text>
+        <Text style={styles.title}>{pegi.libelle}</Text>
+        <Text style={styles.texte}>{pegi.description}</Text>
         <View style={styles.idBadge}>
-          <Text style={styles.idText}>#{plateforme.id}</Text>
+          <Text style={styles.idText}>#{pegi.id}</Text>
         </View>
       </View>
 
@@ -68,5 +68,5 @@ const styles = StyleSheet.create({
   logoutBtn: { backgroundColor: '#FEE2E2', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 20, alignItems: 'center', borderWidth: 1, borderColor: '#FECACA' },
   logoutBtnPressed: { backgroundColor: '#FECACA' },
   logoutText: { fontSize: 15, fontWeight: '700', color: '#DC2626' },
-    text: { fontSize: 18, color: '#black', textAlign: 'center', lineHeight: 22, paddingBottom: 10 },
+  texte: { fontSize: 18, color: '#black', textAlign: 'center', lineHeight: 22, paddingBottom: 10 },
 });

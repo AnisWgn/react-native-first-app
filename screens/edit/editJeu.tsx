@@ -14,73 +14,63 @@ import {
   deleteDoc,
   doc,
   collection,
-  getDocs,
-  query,
-  orderBy,
-  limit,
 } from 'firebase/firestore';
-import { db, auth } from '../fireBaseConfig.js';
+import { db, auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
-export default function EditPlateforme({ route, navigation }) {
-  const plateforme = route?.params?.plateforme ?? null;
-  const [libelle, setLibelle] = useState('');
+export default function EditJeu({ route, navigation }) {
+  const jeu = route?.params?.jeu ?? null;
+  const [nom, setNom] = useState('');
   const [description, setDescription] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('page1');
+      if (!user) navigation.replace('pageConnexion');
     });
     return () => unsubscribe();
   }, [navigation]);
 
   useEffect(() => {
-    if (plateforme) {
-      setLibelle(plateforme.libelle ?? '');
-      setDescription(plateforme.description ?? '');
+    if (jeu) {
+      setNom(jeu.nom ?? '');
+      setDescription(jeu.description ?? '');
     }
-  }, [plateforme]);
+  }, [jeu]);
 
   const handleCreate = async () => {
     try {
-      if (!libelle.trim()) return;
-      const plateformesCol = collection(db, 'plateformes');
-      let payload: Record<string, unknown> = { libelle: libelle.trim(), description: description.trim() };
-      try {
-        const q = query(plateformesCol, orderBy('idPlateforme', 'desc'), limit(1));
-        const snapshot = await getDocs(q);
-        payload.idPlateforme = snapshot.empty ? 1 : ((snapshot.docs[0].data().idPlateforme ?? 0) + 1);
-      } catch {
-        payload.idPlateforme = 1;
-      }
-      await addDoc(plateformesCol, payload);
+      if (!nom.trim()) return;
+      await addDoc(collection(db, 'jeux'), {
+        nom: nom.trim(),
+        description: description.trim(),
+      });
       navigation.goBack();
     } catch (error) {
       console.log('Erreur création :', error);
-      Alert.alert('Erreur', 'Impossible de créer la plateforme.');
+      Alert.alert('Erreur', 'Impossible de créer le jeu.');
     }
   };
 
   const handleUpdate = async () => {
-    if (!plateforme?.id) return;
+    if (!jeu?.id) return;
     try {
-      if (!libelle.trim()) return;
-      await updateDoc(doc(db, 'plateformes', plateforme.id), {
-        libelle: libelle.trim(),
+      if (!nom.trim()) return;
+      await updateDoc(doc(db, 'jeux', jeu.id), {
+        nom: nom.trim(),
         description: description.trim(),
       });
       navigation.goBack();
     } catch (error) {
       console.log('Erreur modification :', error);
-      Alert.alert('Erreur', 'Impossible de modifier la plateforme.');
+      Alert.alert('Erreur', 'Impossible de modifier le jeu.');
     }
   };
 
   const handleDelete = () => {
-    if (!plateforme?.id) return;
+    if (!jeu?.id) return;
     Alert.alert(
       'Confirmer la suppression',
-      `Supprimer la plateforme "${libelle || plateforme.libelle}" ?`,
+      `Supprimer le jeu "${nom || jeu.nom}" ?`,
       [
         { text: 'Annuler', style: 'cancel' },
         {
@@ -88,10 +78,10 @@ export default function EditPlateforme({ route, navigation }) {
           style: 'destructive',
           onPress: async () => {
             try {
-              await deleteDoc(doc(db, 'plateformes', plateforme.id));
+              await deleteDoc(doc(db, 'jeux', jeu.id));
               navigation.goBack();
             } catch (error) {
-              Alert.alert('Erreur', 'Impossible de supprimer la plateforme.');
+              Alert.alert('Erreur', 'Impossible de supprimer le jeu.');
             }
           },
         },
@@ -102,13 +92,13 @@ export default function EditPlateforme({ route, navigation }) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.card}>
-        <View style={[styles.accentBar, { backgroundColor: '#8B5CF6' }]} />
-        <Text style={styles.title}>{plateforme ? 'Modifier la plateforme' : 'Créer une plateforme'}</Text>
+        <View style={[styles.accentBar, { backgroundColor: '#10B981' }]} />
+        <Text style={styles.title}>{jeu ? 'Modifier le jeu' : 'Créer un jeu'}</Text>
         <TextInput
           style={styles.input}
-          value={libelle}
-          onChangeText={setLibelle}
-          placeholder="Libellé (ex: PlayStation 5)"
+          value={nom}
+          onChangeText={setNom}
+          placeholder="Nom du jeu"
           placeholderTextColor="#94A3B8"
         />
         <TextInput
@@ -119,7 +109,7 @@ export default function EditPlateforme({ route, navigation }) {
           placeholderTextColor="#94A3B8"
           multiline
         />
-        {plateforme ? (
+        {jeu ? (
           <View style={styles.actions}>
             <Pressable style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]} onPress={handleUpdate}>
               <Text style={styles.btnText}>Modifier</Text>
@@ -136,9 +126,9 @@ export default function EditPlateforme({ route, navigation }) {
       </View>
       <View style={styles.footer}>
         <Pressable style={({ pressed }) => [styles.backBtn, pressed && styles.btnPressed]} onPress={() => navigation.goBack()}>
-          <Text style={styles.backBtnText}>Retour à la liste des plateformes</Text>
+          <Text style={styles.backBtnText}>Retour à la liste des jeux</Text>
         </Pressable>
-        <Pressable style={({ pressed }) => [styles.logoutBtn, pressed && styles.logoutBtnPressed]} onPress={async () => { await signOut(auth); navigation.replace('page1'); }}>
+        <Pressable style={({ pressed }) => [styles.logoutBtn, pressed && styles.logoutBtnPressed]} onPress={async () => { await signOut(auth); navigation.replace('pageConnexion'); }}>
           <Text style={styles.logoutText}>Quitter</Text>
         </Pressable>
       </View>
