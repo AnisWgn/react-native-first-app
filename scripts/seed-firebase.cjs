@@ -18,6 +18,29 @@ const serviceAccount = require(serviceAccountPath);
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
 
+/** Document jeu : champs alignés avec l’app (édition / formulaire). */
+function jeuDoc({
+  nom,
+  description,
+  ageLimite = '',
+  dateParution = '',
+  libGenre = '',
+  libPlateforme = '',
+  nomMarque = '',
+  prix = '',
+}) {
+  return {
+    nom,
+    description,
+    ageLimite,
+    dateParution,
+    libGenre,
+    libPlateforme,
+    nomMarque,
+    prix,
+  };
+}
+
 const DATA = {
   genres: [
     { libelle: 'RPG', description: 'Jeu de rôle' },
@@ -29,11 +52,38 @@ const DATA = {
     { libelle: 'Sport', description: 'Jeu de sport' },
   ],
   jeux: [
-    { nom: 'The Legend of Zelda: Breath of the Wild', description: 'Jeu d\'aventure action en 3D développé par Nintendo.' },
-    { nom: 'Elden Ring', description: 'Jeu de rôle action en 3D développé par FromSoftware.' },
-    { nom: 'Minecraft', description: 'Jeu de construction sandbox développé par Mojang.' },
-    { nom: 'Super Mario Odyssey', description: 'Jeu d\'aventure platformer développé par Nintendo.' },
-    { nom: 'Hades', description: 'Jeu d\'action roguelike développé par Supergiant Games.' },
+    jeuDoc({
+      nom: 'The Legend of Zelda: Breath of the Wild',
+      description: 'Jeu d\'aventure action en 3D développé par Nintendo.',
+      ageLimite: 'PEGI 12',
+      dateParution: '2017-03-03',
+      libGenre: 'Aventure',
+      libPlateforme: 'Nintendo Switch',
+      nomMarque: 'Nintendo',
+      prix: '59,99',
+    }),
+    jeuDoc({
+      nom: 'Elden Ring',
+      description: 'Jeu de rôle action en 3D développé par FromSoftware.',
+    }),
+    jeuDoc({
+      nom: 'Minecraft',
+      description: 'Jeu de construction sandbox développé par Mojang.',
+    }),
+    jeuDoc({
+      nom: 'Super Mario Odyssey',
+      description: 'Jeu d\'aventure platformer développé par Nintendo.',
+    }),
+    jeuDoc({
+      nom: 'Hades',
+      description: 'Jeu d\'action roguelike développé par Supergiant Games.',
+      ageLimite: 'PEGI 12',
+      dateParution: '2020-09-17',
+      libGenre: 'Indie',
+      libPlateforme: 'PC',
+      nomMarque: 'Supergiant Games',
+      prix: '24,99',
+    }),
   ],
   marques: [
     { libelle: 'Nintendo', description: 'Compagnie de jeux vidéo japonaise.' },

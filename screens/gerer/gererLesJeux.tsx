@@ -89,6 +89,11 @@ export default function GererLesJeux({ navigation }) {
                 <View style={styles.cardAccent} />
                 <View style={styles.cardBody}>
                   <Text style={styles.cardTitle}>{item.nom}</Text>
+                  {(item.prix || item.libGenre || item.libPlateforme) ? (
+                    <Text style={styles.cardMeta} numberOfLines={2}>
+                      {[item.libGenre, item.libPlateforme, item.prix ? `${item.prix} €` : null].filter(Boolean).join(' · ')}
+                    </Text>
+                  ) : null}
                   <Text style={styles.cardId}>#{item.id}</Text>
                 </View>
                 <Text style={styles.cardArrow}>›</Text>
@@ -139,6 +144,7 @@ const styles = StyleSheet.create({
   cardAccent: { width: 4, height: 32, borderRadius: 2, backgroundColor: ACCENT, marginRight: 14 },
   cardBody: { flex: 1 },
   cardTitle: { fontSize: 16, fontWeight: '700', color: '#1E293B', marginBottom: 2 },
+  cardMeta: { fontSize: 13, color: '#64748B', marginBottom: 4 },
   cardId: { fontSize: 13, color: '#94A3B8', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   cardArrow: { fontSize: 24, color: '#94A3B8', fontWeight: '300' },
   btnModifier: { marginTop: 10, backgroundColor: '#6366F1', paddingVertical: 8, borderRadius: 10, alignItems: 'center' },

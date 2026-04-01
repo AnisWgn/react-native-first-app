@@ -22,6 +22,12 @@ export default function EditJeu({ route, navigation }) {
   const jeu = route?.params?.jeu ?? null;
   const [nom, setNom] = useState('');
   const [description, setDescription] = useState('');
+  const [prix, setPrix] = useState('');
+  const [dateParution, setDateParution] = useState('');
+  const [ageLimite, setAgeLimite] = useState('');
+  const [libGenre, setLibGenre] = useState('');
+  const [libPlateforme, setLibPlateforme] = useState('');
+  const [nomMarque, setNomMarque] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -34,16 +40,30 @@ export default function EditJeu({ route, navigation }) {
     if (jeu) {
       setNom(jeu.nom ?? '');
       setDescription(jeu.description ?? '');
+      setPrix(String(jeu.prix ?? ''));
+      setDateParution(String(jeu.dateParution ?? ''));
+      setAgeLimite(String(jeu.ageLimite ?? ''));
+      setLibGenre(String(jeu.libGenre ?? ''));
+      setLibPlateforme(String(jeu.libPlateforme ?? ''));
+      setNomMarque(String(jeu.nomMarque ?? ''));
     }
   }, [jeu]);
+
+  const jeuPayload = () => ({
+    nom: nom.trim(),
+    description: description.trim(),
+    prix: prix.trim(),
+    dateParution: dateParution.trim(),
+    ageLimite: ageLimite.trim(),
+    libGenre: libGenre.trim(),
+    libPlateforme: libPlateforme.trim(),
+    nomMarque: nomMarque.trim(),
+  });
 
   const handleCreate = async () => {
     try {
       if (!nom.trim()) return;
-      await addDoc(collection(db, 'jeux'), {
-        nom: nom.trim(),
-        description: description.trim(),
-      });
+      await addDoc(collection(db, 'jeux'), jeuPayload());
       navigation.goBack();
     } catch (error) {
       console.log('Erreur création :', error);
@@ -55,10 +75,7 @@ export default function EditJeu({ route, navigation }) {
     if (!jeu?.id) return;
     try {
       if (!nom.trim()) return;
-      await updateDoc(doc(db, 'jeux', jeu.id), {
-        nom: nom.trim(),
-        description: description.trim(),
-      });
+      await updateDoc(doc(db, 'jeux', jeu.id), jeuPayload());
       navigation.goBack();
     } catch (error) {
       console.log('Erreur modification :', error);
@@ -109,6 +126,55 @@ export default function EditJeu({ route, navigation }) {
           placeholderTextColor="#94A3B8"
           multiline
         />
+        <Text style={styles.fieldLabel}>Prix</Text>
+        <TextInput
+          style={styles.input}
+          value={prix}
+          onChangeText={setPrix}
+          placeholder="Ex. 59,99"
+          placeholderTextColor="#94A3B8"
+          keyboardType="decimal-pad"
+        />
+        <Text style={styles.fieldLabel}>Date de parution</Text>
+        <TextInput
+          style={styles.input}
+          value={dateParution}
+          onChangeText={setDateParution}
+          placeholder="Ex. 2020-09-17"
+          placeholderTextColor="#94A3B8"
+        />
+        <Text style={styles.fieldLabel}>Âge limite (PEGI)</Text>
+        <TextInput
+          style={styles.input}
+          value={ageLimite}
+          onChangeText={setAgeLimite}
+          placeholder="Ex. PEGI 12"
+          placeholderTextColor="#94A3B8"
+        />
+        <Text style={styles.fieldLabel}>Genre (libellé)</Text>
+        <TextInput
+          style={styles.input}
+          value={libGenre}
+          onChangeText={setLibGenre}
+          placeholder="Ex. Action"
+          placeholderTextColor="#94A3B8"
+        />
+        <Text style={styles.fieldLabel}>Plateforme (libellé)</Text>
+        <TextInput
+          style={styles.input}
+          value={libPlateforme}
+          onChangeText={setLibPlateforme}
+          placeholder="Ex. PC"
+          placeholderTextColor="#94A3B8"
+        />
+        <Text style={styles.fieldLabel}>Marque (nom)</Text>
+        <TextInput
+          style={styles.input}
+          value={nomMarque}
+          onChangeText={setNomMarque}
+          placeholder="Ex. Nintendo"
+          placeholderTextColor="#94A3B8"
+        />
         {jeu ? (
           <View style={styles.actions}>
             <Pressable style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]} onPress={handleUpdate}>
@@ -141,7 +207,8 @@ const styles = StyleSheet.create({
   content: { padding: 24, paddingTop: 60 },
   card: { backgroundColor: '#FFFFFF', borderRadius: 20, padding: 28, shadowColor: '#6366F1', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 16, elevation: 8, alignItems: 'center' },
   accentBar: { width: 48, height: 4, borderRadius: 2, marginBottom: 20 },
-  title: { fontSize: 22, fontWeight: '800', color: '#1E293B', marginBottom: 20 },
+  title: { fontSize: 22, fontWeight: '800', color: '#1E293B', marginBottom: 20, alignSelf: 'center' },
+  fieldLabel: { alignSelf: 'flex-start', fontSize: 13, fontWeight: '600', color: '#64748B', marginBottom: 6, width: '100%' },
   input: { borderWidth: 1, borderColor: '#E2E8F0', width: '100%', padding: 14, marginBottom: 16, backgroundColor: '#FFFFFF', borderRadius: 12, fontSize: 16, color: '#1E293B' },
   textArea: { minHeight: 80, textAlignVertical: 'top' },
   actions: { flexDirection: 'row', gap: 12, width: '100%', marginBottom: 12 },
