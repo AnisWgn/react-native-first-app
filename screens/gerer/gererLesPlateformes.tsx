@@ -4,12 +4,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { fetchUserRole, isAdmin } from '../../utils/userRole';
 
 // Gestion des plateformes : PC, Switch, PS5... toutes reunies sans guerre de fanboys
 export default function GererLesPlateformes({ navigation }) {
   const [plateformes, setPlateformes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -37,9 +39,15 @@ export default function GererLesPlateformes({ navigation }) {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('pageConnexion');
-      else loadPlateformes();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setRole(null);
+        navigation.replace('pageConnexion');
+        return;
+      }
+      const r = await fetchUserRole(user.uid);
+      setRole(r);
+      loadPlateformes();
     });
     return () => unsubscribe();
   }, [navigation, loadPlateformes]);
@@ -53,10 +61,12 @@ export default function GererLesPlateformes({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Plateformes</Text>
-        <Pressable style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editPlateforme')}>
-          <Text style={styles.btnCreerText}>Créer une plateforme</Text>
-        </Pressable>
+        <Text style={styles.title}>Plateformes{isAdmin(role) ? ' (admin)' : ''}</Text>
+        {isAdmin(role) && (
+          <Pressable style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editPlateforme')}>
+            <Text style={styles.btnCreerText}>Créer une plateforme</Text>
+          </Pressable>
+        )}
         <View style={styles.badge}>
           <View style={styles.badgeDot} />
           <Text style={styles.badgeText}>{auth.currentUser?.email}</Text>
@@ -93,9 +103,11 @@ export default function GererLesPlateformes({ navigation }) {
                 </View>
                 <Text style={styles.cardArrow}>›</Text>
               </TouchableOpacity>
-              <Pressable style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editPlateforme', { plateforme: item })}>
-                <Text style={styles.btnModifierText}>Modifier</Text>
-              </Pressable>
+              {isAdmin(role) && (
+                <Pressable style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editPlateforme', { plateforme: item })}>
+                  <Text style={styles.btnModifierText}>Modifier</Text>
+                </Pressable>
+              )}
             </View>
           )}
         />

@@ -4,12 +4,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { fetchUserRole, isAdmin } from '../../utils/userRole';
 
 // Gestion des genres : RPG, FPS, indie... Firestore les stocke tous sans discrimination
 export default function GererLesGenres({ navigation }) {
   const [genres, setGenres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -37,9 +39,15 @@ export default function GererLesGenres({ navigation }) {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('pageConnexion');
-      else loadGenres();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setRole(null);
+        navigation.replace('pageConnexion');
+        return;
+      }
+      const r = await fetchUserRole(user.uid);
+      setRole(r);
+      loadGenres();
     });
     return () => unsubscribe();
   }, [navigation, loadGenres]);
@@ -53,13 +61,17 @@ export default function GererLesGenres({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Genres</Text>
-        <Pressable
-          style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]}
-          onPress={() => navigation.navigate('editGenre')}
-        >
-          <Text style={styles.btnCreerText}>Créer un genre</Text>
-        </Pressable>
+        <Text style={styles.title}>
+          Genres{isAdmin(role) ? ' (admin)' : ''}
+        </Text>
+        {isAdmin(role) && (
+          <Pressable
+            style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]}
+            onPress={() => navigation.navigate('editGenre')}
+          >
+            <Text style={styles.btnCreerText}>Créer un genre</Text>
+          </Pressable>
+        )}
         <View style={styles.badge}>
           <View style={styles.badgeDot} />
           <Text style={styles.badgeText}>{auth.currentUser?.email}</Text>
@@ -100,12 +112,14 @@ export default function GererLesGenres({ navigation }) {
                 </View>
                 <Text style={styles.cardArrow}>›</Text>
               </TouchableOpacity>
-              <Pressable
-                style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]}
-                onPress={() => navigation.navigate('editGenre', { genre: item })}
-              >
-                <Text style={styles.btnModifierText}>Modifier</Text>
-              </Pressable>
+              {isAdmin(role) && (
+                <Pressable
+                  style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]}
+                  onPress={() => navigation.navigate('editGenre', { genre: item })}
+                >
+                  <Text style={styles.btnModifierText}>Modifier</Text>
+                </Pressable>
+              )}
             </View>
           )}
         />

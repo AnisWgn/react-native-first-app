@@ -1,18 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { auth } from '../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { fetchUserRole, isAdmin } from '../utils/userRole';
 
 const menuItems = [
-  { label: 'Gerer les jeux', route: 'gererLesJeux', accent: '#10B981' },
-  { label: 'Gerer les genres', route: 'gererLesGenres', accent: '#3B82F6' },
-  { label: 'Gerer les PEGI', route: 'gererLesPegis', accent: '#F97316' },
-  { label: 'Gerer les marques', route: 'gererLesMarques', accent: '#EC4899' },
-  { label: 'Gerer les plateformes', route: 'gererLesPlateformes', accent: '#8B5CF6' },
+  { label: 'Gerer les jeux', route: 'gererLesJeux', accent: '#10B981', adminOnly: false },
+  { label: 'Gerer les genres', route: 'gererLesGenres', accent: '#3B82F6', adminOnly: false },
+  { label: 'Gerer les PEGI', route: 'gererLesPegis', accent: '#F97316', adminOnly: true },
+  { label: 'Gerer les marques', route: 'gererLesMarques', accent: '#EC4899', adminOnly: true },
+  { label: 'Gerer les plateformes', route: 'gererLesPlateformes', accent: '#8B5CF6', adminOnly: true },
 ];
 
 // Le menu principal : le carrefour de toutes les routes 
 export default function Menu({ navigation }) {
+  const [role, setRole] = useState<string | null>(null);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -23,20 +26,29 @@ export default function Menu({ navigation }) {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
+        setRole(null);
         navigation.replace('pageConnexion');
+        return;
       }
+      const r = await fetchUserRole(user.uid);
+      setRole(r);
     });
     return () => unsubscribe();
   }, [navigation]);
+
+  const visibleMenuItems = menuItems.filter((item) => !item.adminOnly || isAdmin(role));
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Dashboard</Text>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>{auth.currentUser?.email}</Text>
+          <Text style={styles.badgeText}>
+            {auth.currentUser?.email}
+            {isAdmin(role) ? ' (admin)' : ''}
+          </Text>
         </View>
       </View>
 
@@ -45,7 +57,7 @@ export default function Menu({ navigation }) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {menuItems.map((item, index) => (
+        {visibleMenuItems.map((item, index) => (
           <Pressable
             key={index}
             style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}

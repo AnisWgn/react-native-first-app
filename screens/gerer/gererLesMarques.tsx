@@ -4,12 +4,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { fetchUserRole, isAdmin } from '../../utils/userRole';
 
 // Gestion des marques : Nintendo, Sony, Xbox... la guerre des consoles, version Firestore
 export default function GererLesMarques({ navigation }) {
   const [marques, setMarques] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -37,9 +39,15 @@ export default function GererLesMarques({ navigation }) {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) navigation.replace('pageConnexion');
-      else loadMarques();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setRole(null);
+        navigation.replace('pageConnexion');
+        return;
+      }
+      const r = await fetchUserRole(user.uid);
+      setRole(r);
+      loadMarques();
     });
     return () => unsubscribe();
   }, [navigation, loadMarques]);
@@ -53,10 +61,12 @@ export default function GererLesMarques({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Marques</Text>
-        <Pressable style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editMarque')}>
-          <Text style={styles.btnCreerText}>Créer une marque</Text>
-        </Pressable>
+        <Text style={styles.title}>Marques{isAdmin(role) ? ' (admin)' : ''}</Text>
+        {isAdmin(role) && (
+          <Pressable style={({ pressed }) => [styles.btnCreer, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editMarque')}>
+            <Text style={styles.btnCreerText}>Créer une marque</Text>
+          </Pressable>
+        )}
         <View style={styles.badge}>
           <View style={styles.badgeDot} />
           <Text style={styles.badgeText}>{auth.currentUser?.email}</Text>
@@ -93,9 +103,11 @@ export default function GererLesMarques({ navigation }) {
                 </View>
                 <Text style={styles.cardArrow}>›</Text>
               </TouchableOpacity>
-              <Pressable style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editMarque', { marque: item })}>
-                <Text style={styles.btnModifierText}>Modifier</Text>
-              </Pressable>
+              {isAdmin(role) && (
+                <Pressable style={({ pressed }) => [styles.btnModifier, pressed && styles.btnPressed]} onPress={() => navigation.navigate('editMarque', { marque: item })}>
+                  <Text style={styles.btnModifierText}>Modifier</Text>
+                </Pressable>
+              )}
             </View>
           )}
         />
