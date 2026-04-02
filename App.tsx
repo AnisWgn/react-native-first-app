@@ -1,35 +1,29 @@
-import React, { useCallback } from 'react';
-import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import React, { useCallback, useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
 
-//Import remplacer par lazy
-//import { ConnexionScreen } from './screens/connexion';
-//import { MenuScreen } from './screens/menu';
+import ConnexionScreen from './screens/connexion';
+import MenuScreen from './screens/menu';
+import GererLesJeuxScreen from './screens/gerer/gererLesJeux';
+import DetailJeuScreen from './screens/detail/detailJeu';
+import EditJeuScreen from './screens/edit/editJeu';
+import GererLesGenresScreen from './screens/gerer/gererLesGenres';
+import DetailGenreScreen from './screens/detail/detailGenre';
+import EditGenreScreen from './screens/edit/editGenre';
+import GererLesPegisScreen from './screens/gerer/gererLesPegis';
+import DetailPegiScreen from './screens/detail/detailPegi';
+import EditPegiScreen from './screens/edit/editPegi';
+import GererLesMarquesScreen from './screens/gerer/gererLesMarques';
+import DetailMarqueScreen from './screens/detail/detailMarque';
+import EditMarqueScreen from './screens/edit/editMarque';
+import GererLesPlateformesScreen from './screens/gerer/gererLesPlateformes';
+import DetailPlateformeScreen from './screens/detail/detailPlateforme';
+import EditPlateformeScreen from './screens/edit/editPlateforme';
 
 SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator();
-
-// Chargement différé des écrans grâce à React.lazy le GOAT (no cap, best perf ever)
-const ConnexionScreen = React.lazy(() => import('./screens/connexion'));
-const MenuScreen = React.lazy(() => import('./screens/menu'));
-const GererLesJeuxScreen = React.lazy(() => import('./screens/gerer/gererLesJeux'));
-const DetailJeuScreen = React.lazy(() => import('./screens/detail/detailJeu'));
-const EditJeuScreen = React.lazy(() => import('./screens/edit/editJeu'));
-const GererLesGenresScreen = React.lazy(() => import('./screens/gerer/gererLesGenres'));
-const DetailGenreScreen = React.lazy(() => import('./screens/detail/detailGenre'));
-const EditGenreScreen = React.lazy(() => import('./screens/edit/editGenre'));
-const GererLesPegisScreen = React.lazy(() => import('./screens/gerer/gererLesPegis'));
-const DetailPegiScreen = React.lazy(() => import('./screens/detail/detailPegi'));
-const EditPegiScreen = React.lazy(() => import('./screens/edit/editPegi'));
-const GererLesMarquesScreen = React.lazy(() => import('./screens/gerer/gererLesMarques'));
-const DetailMarqueScreen = React.lazy(() => import('./screens/detail/detailMarque'));
-const EditMarqueScreen = React.lazy(() => import('./screens/edit/editMarque'));
-const GererLesPlateformesScreen = React.lazy(() => import('./screens/gerer/gererLesPlateformes'));
-const DetailPlateformeScreen = React.lazy(() => import('./screens/detail/detailPlateforme'));
-const EditPlateformeScreen = React.lazy(() => import('./screens/edit/editPlateforme'));
 
 function MainStack() {
   return (
@@ -56,35 +50,17 @@ function MainStack() {
 }
 
 export default function App() {
-  const onReady = useCallback(() => {
-    SplashScreen.hideAsync();
+  const hideSplash = useCallback(() => {
+    SplashScreen.hideAsync().catch(() => {});
   }, []);
 
+  useEffect(() => {
+    hideSplash();
+  }, [hideSplash]);
+
   return (
-    <NavigationContainer onReady={onReady}>
-      <React.Suspense fallback={
-        <View style={loadingStyles.container}>
-          <ActivityIndicator size="large" color="#6366F1" />
-          <Text style={loadingStyles.text}>Chargement...</Text>
-        </View>
-      }>
-        <MainStack />
-      </React.Suspense>
+    <NavigationContainer onReady={hideSplash}>
+      <MainStack />
     </NavigationContainer>
   );
 }
-
-const loadingStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-  },
-  text: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#64748B',
-    fontWeight: '500',
-  },
-});

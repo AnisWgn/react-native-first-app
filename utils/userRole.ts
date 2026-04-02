@@ -1,22 +1,40 @@
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../fireBaseConfig.js';
 
-/** Rôle depuis la collection Firestore `utilisateurs` (document id = uid auth). */
-export async function fetchUserRole(uid: string): Promise<string> {
+/**
+ * Rôle depuis la collection Firestore `utilisateurs` (document id = uid auth).
+ * Champs acceptés : `roles` (recommandé) ou ancien `role` (rétrocompatibilité).
+ * Si le document n’existe pas encore, il est créé avec `roles: 'user'` (première connexion).
+ *
+ * Règles Firestore conseillées : l’utilisateur peut lire/écrire uniquement `utilisateurs/{uid}` où uid == auth.uid.
+ */
+export async function fetchUserRole(uid: string, email?: string | null): Promise<string> {
   try {
-    const userDoc = await getDoc(doc(db, 'utilisateurs', uid));
+    const ref = doc(db, 'utilisateurs', uid);
+    const userDoc = await getDoc(ref);
     if (userDoc.exists()) {
-      const data = userDoc.data();
-      return (data?.role as string) ?? 'inconnu';
+      const data = userDoc.data() as { roles?: unknown; role?: unknown };
+      const raw = data?.roles ?? data?.role;
+      const str = raw == null ? '' : String(raw).trim().toLowerCase();
+      if (str === 'admin') {
+        return 'admin';
+      }
+      return 'user';
     }
-    console.log('Document utilisateur introuvable !');
-    return 'inconnu';
+
+    await setDoc(ref, {
+      roles: 'user',
+      email: email ?? null,
+      createdAt: serverTimestamp(),
+    });
+
+    return 'user';
   } catch (error) {
-    console.log('Erreur lecture Firestore :', error);
-    return 'inconnu';
+    console.warn('Firestore utilisateurs :', error);
+    return 'user';
   }
 }
 
 export function isAdmin(role: string | null): boolean {
-  return role === 'admin';
+  return role?.trim().toLowerCase() === 'admin';
 }

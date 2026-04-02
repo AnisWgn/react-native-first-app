@@ -1,5 +1,16 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, Pressable, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Pressable,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 import { useState } from 'react';
 import { auth } from '../fireBaseConfig.js';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -8,14 +19,25 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 export default function ConnexionScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    if (!trimmedEmail || !trimmedPassword) {
+      Alert.alert('Champs requis', 'Renseigne ton email et ton mot de passe.');
+      return;
+    }
+    setLoading(true);
+    signInWithEmailAndPassword(auth, trimmedEmail, trimmedPassword)
+      .then(() => {
         navigation.navigate('pageMenu');
       })
       .catch((error) => {
-        Alert.alert('Erreur de connexion', error.message);
+        Alert.alert('Erreur de connexion', error.message || String(error));
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -25,46 +47,66 @@ export default function ConnexionScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <StatusBar style="dark" />
-      <View style={styles.header}>
-        <Text style={styles.logo}>GG</Text>
-        <Text style={styles.appName}>GameGestion</Text>
-        <Text style={styles.tagline}>Votre dashboard gaming</Text>
-      </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text style={styles.logo}>GG</Text>
+          <Text style={styles.appName}>GameGestion</Text>
+          <Text style={styles.tagline}>Votre dashboard gaming</Text>
+        </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Connexion</Text>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Connexion</Text>
 
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          placeholder="dev@gamesgestion.io"
-          placeholderTextColor="#94A3B8"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          autoCorrect={false}
-          style={styles.input}
-        />
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            placeholder="dev@gamesgestion.io"
+            placeholderTextColor="#94A3B8"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            autoCorrect={false}
+            style={styles.input}
+            editable={!loading}
+          />
 
-        <Text style={styles.label}>Mot de passe</Text>
-        <TextInput
-          placeholder="••••••••"
-          placeholderTextColor="#94A3B8"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          style={styles.input}
-        />
+          <Text style={styles.label}>Mot de passe</Text>
+          <TextInput
+            placeholder="••••••••"
+            placeholderTextColor="#94A3B8"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+            editable={!loading}
+            onSubmitEditing={handleLogin}
+            returnKeyType="go"
+          />
 
-        <Pressable
-          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-          onPress={handleLogin}
-        >
-          <Text style={styles.buttonText}>Se connecter</Text>
-        </Pressable>
-      </View>
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              (pressed || loading) && styles.buttonPressed,
+              loading && styles.buttonDisabled,
+            ]}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.buttonText}>Se connecter</Text>
+            )}
+          </Pressable>
+        </View>
 
-      <Text style={styles.footer}>Propulse par Firebase & React Native</Text>
+        <Text style={styles.footer}>Propulse par Firebase & React Native</Text>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -73,9 +115,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
+  },
+  scrollContent: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
+    paddingVertical: 32,
   },
   header: {
     alignItems: 'center',
@@ -153,6 +199,9 @@ const styles = StyleSheet.create({
   buttonPressed: {
     backgroundColor: '#4F46E5',
     transform: [{ scale: 0.98 }],
+  },
+  buttonDisabled: {
+    opacity: 0.85,
   },
   buttonText: {
     color: '#FFFFFF',

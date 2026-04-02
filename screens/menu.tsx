@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Platform } from 'react-native';
 import { auth } from '../fireBaseConfig.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { fetchUserRole, isAdmin } from '../utils/userRole';
@@ -15,6 +15,7 @@ const menuItems = [
 // Le menu principal : le carrefour de toutes les routes 
 export default function Menu({ navigation }) {
   const [role, setRole] = useState<string | null>(null);
+  const [authUid, setAuthUid] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -29,10 +30,12 @@ export default function Menu({ navigation }) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         setRole(null);
+        setAuthUid(null);
         navigation.replace('pageConnexion');
         return;
       }
-      const r = await fetchUserRole(user.uid);
+      setAuthUid(user.uid);
+      const r = await fetchUserRole(user.uid, user.email);
       setRole(r);
     });
     return () => unsubscribe();
@@ -47,7 +50,7 @@ export default function Menu({ navigation }) {
         <View style={styles.badge}>
           <Text style={styles.badgeText}>
             {auth.currentUser?.email}
-            {isAdmin(role) ? ' (admin)' : ''}
+            {isAdmin(role) ? ' (admin)' : ' (utilisateur)'}
           </Text>
         </View>
       </View>
@@ -110,6 +113,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#6366F1',
     fontWeight: '600',
+  },
+  uidHint: {
+    marginTop: 10,
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 16,
+  },
+  uidMono: {
+    fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
+    fontSize: 11,
+    color: '#334155',
+  },
+  uidHelp: {
+    fontSize: 10,
+    color: '#94A3B8',
+    marginTop: 4,
   },
   scrollView: {
     flex: 1,
