@@ -7,6 +7,7 @@ import { fetchUserRole, isAdmin } from '../utils/userRole';
 const menuItems = [
   { label: 'Gerer les jeux', route: 'gererLesJeux', accent: '#10B981', adminOnly: false },
   { label: 'Gerer les genres', route: 'gererLesGenres', accent: '#3B82F6', adminOnly: false },
+  { label: 'Gerer les activites', route: 'gererLesActivites', accent: '#0EA5E9', adminOnly: false },
   { label: 'Gerer les PEGI', route: 'gererLesPegis', accent: '#F97316', adminOnly: true },
   { label: 'Gerer les marques', route: 'gererLesMarques', accent: '#EC4899', adminOnly: true },
   { label: 'Gerer les plateformes', route: 'gererLesPlateformes', accent: '#8B5CF6', adminOnly: true },

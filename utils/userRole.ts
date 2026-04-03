@@ -24,6 +24,7 @@ export async function fetchUserRole(uid: string, email?: string | null): Promise
 
     await setDoc(ref, {
       roles: 'user',
+      role: 'user',
       email: email ?? null,
       createdAt: serverTimestamp(),
     });

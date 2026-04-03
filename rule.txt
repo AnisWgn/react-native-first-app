@@ -1,58 +1,44 @@
 rules_version = '2';
 service cloud.firestore {
- match /databases/{database}/documents {
-    // Lecture autorisée aux utilisateurs connectés
- match /genres/{document} {
- allow read: if request.auth != null;
- // Écriture seulement si admin
- allow write: if request.auth != null
- && get(/databases/$(database)/documents/utilisateurs/$(request.auth.uid)).data.roles ==
-"admin";
- }
-
-  match /jeux/{document} {
- allow read: if request.auth != null;
- // Écriture seulement si admin
- allow write: if request.auth != null
- && get(/databases/$(database)/documents/utilisateurs/$(request.auth.uid)).data.roles ==
-"admin";
- }
-
-  match /marques/{document} {
- allow read: if request.auth != null;
- // Écriture seulement si admin
- allow write: if request.auth != null
- && get(/databases/$(database)/documents/utilisateurs/$(request.auth.uid)).data.roles ==
-"admin";
- }
-
-  match /pegis/{document} {
- allow read: if request.auth != null;
- // Écriture seulement si admin
- allow write: if request.auth != null
- && get(/databases/$(database)/documents/utilisateurs/$(request.auth.uid)).data.roles ==
-"admin";
- }
-
-  match /plateformes/{document} {
- allow read: if request.auth != null;
- // Écriture seulement si admin
- allow write: if request.auth != null
- && get(/databases/$(database)/documents/utilisateurs/$(request.auth.uid)).data.roles ==
-"admin";
- }
-
- // Profils utilisateurs : chaque user lit les profils ; crée uniquement le sien (rôle user) ;
- // ne peut pas modifier son propre rôle (promotion admin = Console Firebase ou script admin).
- match /utilisateurs/{userId} {
-   allow read: if request.auth != null;
-   allow create: if request.auth != null
-     && request.auth.uid == userId
-     && request.resource.data.roles == 'user';
-   allow update: if request.auth != null
-     && request.auth.uid == userId
-     && request.resource.data.roles == resource.data.roles;
-   allow delete: if false;
- }
- }
+  match /databases/{database}/documents {
+    
+    // Función para verificar que el usuario logueado tenga el rol "admin"
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/utilisateurs/$(request.auth.uid)).data.role == 'admin';
+    }
+    // Permisos para las colecciones principales (leer para todos, escribir solo admins)
+    match /genres/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /jeux/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /Plateformes/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /Pegis/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /Marques/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /Activite/{document=**} {
+    allow read: if true;
+    allow write: if isAdmin();
+    }
+    
+    // Regla para que los usuarios puedan leer su propio rol
+    match /utilisateurs/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      // Solo tú desde la consola de Firebase puedes cambiar los roles manualmente,
+      // esto evita que cualquier persona cambie su rol a admin.
+      allow write: if false; 
+    }
+  }
 }

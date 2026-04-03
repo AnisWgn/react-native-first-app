@@ -20,6 +20,9 @@ import EditMarqueScreen from './screens/edit/editMarque';
 import GererLesPlateformesScreen from './screens/gerer/gererLesPlateformes';
 import DetailPlateformeScreen from './screens/detail/detailPlateforme';
 import EditPlateformeScreen from './screens/edit/editPlateforme';
+import GererLesActivitesScreen from './screens/gerer/gererLesActivites';
+import DetailActiviteScreen from './screens/detail/detailActivites';
+import EditActiviteScreen from './screens/edit/editActivites';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -45,6 +48,9 @@ function MainStack() {
       <Stack.Screen name="gererLesPlateformes" component={GererLesPlateformesScreen} />
       <Stack.Screen name="detailPlateforme" component={DetailPlateformeScreen} />
       <Stack.Screen name="editPlateforme" component={EditPlateformeScreen} />
+      <Stack.Screen name="gererLesActivites" component={GererLesActivitesScreen} />
+      <Stack.Screen name="detailActivite" component={DetailActiviteScreen} />
+      <Stack.Screen name="editActivite" component={EditActiviteScreen} />
     </Stack.Navigator>
   );
 }

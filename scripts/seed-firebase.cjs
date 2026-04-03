@@ -41,7 +41,38 @@ function jeuDoc({
   };
 }
 
+/** Document activité : ageMinimum, dateDémarrage, libActivités. */
+function activiteDoc({ libActivités, ageMinimum, dateDémarrage }) {
+  return {
+    libActivités,
+    ageMinimum,
+    dateDémarrage,
+  };
+}
+
 const DATA = {
+  activites: [
+    activiteDoc({
+      libActivités: 'Atelier création de jeux (Scratch)',
+      ageMinimum: 8,
+      dateDémarrage: '2026-01-15',
+    }),
+    activiteDoc({
+      libActivités: 'Initiation e-sport et fair-play',
+      ageMinimum: 12,
+      dateDémarrage: '2026-02-03',
+    }),
+    activiteDoc({
+      libActivités: 'Tournoi Mario Kart local',
+      ageMinimum: 7,
+      dateDémarrage: '2026-03-22',
+    }),
+    activiteDoc({
+      libActivités: 'Découverte réalité virtuelle',
+      ageMinimum: 13,
+      dateDémarrage: '2026-04-10',
+    }),
+  ],
   genres: [
     { libelle: 'RPG', description: 'Jeu de rôle' },
     { libelle: 'FPS', description: 'Jeu de tir à la première personne' },
