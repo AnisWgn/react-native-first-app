@@ -23,6 +23,11 @@ import EditPlateformeScreen from './screens/edit/editPlateforme';
 import GererLesActivitesScreen from './screens/gerer/gererLesActivites';
 import DetailActiviteScreen from './screens/detail/detailActivites';
 import EditActiviteScreen from './screens/edit/editActivites';
+import CarteDistanceScreen from './screens/carteDistance';
+import JeuGyroscopeScreen from './screens/jeuGyroscope';
+import ScanQrScreen from './screens/scanQr';
+import { linking } from './navigation/linking';
+import { useAppStartupUpdates } from './hooks/useAppStartupUpdates';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -51,11 +56,16 @@ function MainStack() {
       <Stack.Screen name="gererLesActivites" component={GererLesActivitesScreen} />
       <Stack.Screen name="detailActivite" component={DetailActiviteScreen} />
       <Stack.Screen name="editActivite" component={EditActiviteScreen} />
+      <Stack.Screen name="carteDistance" component={CarteDistanceScreen} />
+      <Stack.Screen name="jeuGyroscope" component={JeuGyroscopeScreen} />
+      <Stack.Screen name="scanQr" component={ScanQrScreen} />
     </Stack.Navigator>
   );
 }
 
 export default function App() {
+  useAppStartupUpdates();
+
   const hideSplash = useCallback(() => {
     SplashScreen.hideAsync().catch(() => {});
   }, []);
@@ -65,7 +75,7 @@ export default function App() {
   }, [hideSplash]);
 
   return (
-    <NavigationContainer onReady={hideSplash}>
+    <NavigationContainer linking={linking} onReady={hideSplash}>
       <MainStack />
     </NavigationContainer>
   );

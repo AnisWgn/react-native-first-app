@@ -14,8 +14,8 @@ import {
 import { useState } from 'react';
 import { auth } from '../fireBaseConfig.js';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import * as Haptics from 'expo-haptics';
 
-// Ecran de connexion : l'entree VIP vers l'app (mot de passe oublie = skill issue)
 export default function ConnexionScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,7 +25,7 @@ export default function ConnexionScreen({ navigation }) {
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
     if (!trimmedEmail || !trimmedPassword) {
-      Alert.alert('Champs requis', 'Renseigne ton email et ton mot de passe.');
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       return;
     }
     setLoading(true);
@@ -34,7 +34,7 @@ export default function ConnexionScreen({ navigation }) {
         navigation.navigate('pageMenu');
       })
       .catch((error) => {
-        Alert.alert('Erreur de connexion', error.message || String(error));
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
       })
       .finally(() => {
         setLoading(false);
@@ -105,7 +105,6 @@ export default function ConnexionScreen({ navigation }) {
           </Pressable>
         </View>
 
-        <Text style={styles.footer}>Propulse par Firebase & React Native</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );

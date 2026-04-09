@@ -8,6 +8,8 @@ const menuItems = [
   { label: 'Gerer les jeux', route: 'gererLesJeux', accent: '#10B981', adminOnly: false },
   { label: 'Gerer les genres', route: 'gererLesGenres', accent: '#3B82F6', adminOnly: false },
   { label: 'Gerer les activites', route: 'gererLesActivites', accent: '#0EA5E9', adminOnly: false },
+  { label: 'Carte & distance', route: 'carteDistance', accent: '#14B8A6', adminOnly: false },
+  { label: 'Jeu gyroscope', route: 'jeuGyroscope', accent: '#F43F5E', adminOnly: false },
   { label: 'Gerer les PEGI', route: 'gererLesPegis', accent: '#F97316', adminOnly: true },
   { label: 'Gerer les marques', route: 'gererLesMarques', accent: '#EC4899', adminOnly: true },
   { label: 'Gerer les plateformes', route: 'gererLesPlateformes', accent: '#8B5CF6', adminOnly: true },
@@ -73,6 +75,13 @@ export default function Menu({ navigation }) {
           </Pressable>
         ))}
       </ScrollView>
+
+      <Pressable
+        style={({ pressed }) => [styles.scanBtn, pressed && styles.scanBtnPressed]}
+        onPress={() => navigation.navigate('scanQr')}
+      >
+        <Text style={styles.scanText}>Scanner un QR</Text>
+      </Pressable>
 
       <Pressable
         style={({ pressed }) => [styles.logoutBtn, pressed && styles.logoutBtnPressed]}
@@ -170,6 +179,23 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#94A3B8',
     fontWeight: '300',
+  },
+  scanBtn: {
+    backgroundColor: '#EEF2FF',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+  },
+  scanBtnPressed: {
+    backgroundColor: '#E0E7FF',
+  },
+  scanText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#4338CA',
   },
   logoutBtn: {
     backgroundColor: '#FEE2E2',
